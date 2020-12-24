@@ -1,55 +1,108 @@
 import requestHandler from '../helpers/requestHandler';
+import realtySifter from '../helpers/realtySifter';
 
-export const clearData = () => {
+export const init = (data, successFunction) => {
   return dispatch => {
-    dispatch({ type: 'DATA_CLEAR' });
+      dispatch({ type: 'INIT', data });
+      if (successFunction && typeof successFunction === 'function') {
+        successFunction();
+      }
   }
 };
-export const startCompare = (data, failFunction) => {
+
+export const updatePrerequisites = (prerequisites, successFunction) => {
+  return dispatch => {
+      dispatch({ type: 'UPDATE_PREREQUISITES', prerequisites });
+      if (successFunction && typeof successFunction === 'function') {
+        successFunction(prerequisites);
+      }
+  }
+};
+
+export const addRealty = (prerequisites, realty, successFunction, failFunction) => {
+  return dispatch => {
+    const requestData = {
+      ...prerequisites,
+      realties: [realty]
+    };
+    console.log(requestData);
+    requestHandler({
+      method: 'post',
+      url: '/compare',
+      requestData,
+      actions: {
+        success: (response) => {
+          const newRealty = response[0];
+          dispatch({ type: 'ADD_REALTY', newRealty });
+          if (successFunction && typeof successFunction === 'function') successFunction(response);
+        },
+        fail: (error) => {
+          if (failFunction && typeof failFunction === 'function') failFunction(error);
+        }
+      }
+    });
+  };
+};
+
+export const updateRealty = (prerequisites, realty, successFunction, failFunction) => {
+  const requestData = {
+    ...prerequisites,
+    realties: [realty]
+  };
   return dispatch => {
     requestHandler({
       method: 'post',
       url: '/compare',
-      data,
+      requestData,
       actions: {
-        start: () => dispatch({ type: 'COMPARE_START' }),
-        success: (data) => dispatch({ type: 'COMPARE_SUCCESS', data }),
+        success: (response) => {
+          const updatedRealty = response[0];
+          dispatch({ type: 'UPDATE_REALTY', updatedRealty })
+          if (successFunction && typeof successFunction === 'function') successFunction(response);
+        },
         fail: (error) => {
-          dispatch({ type: 'COMPARE_FAIL' });
-          if (typeof failFunction === 'function') {
-            failFunction(error);
-          }
+          if (failFunction && typeof failFunction === 'function') failFunction(error);
         }
       }
     });
   };
 };
-export const clearComparison = () => {
-  return dispatch => {
-    dispatch({ type: 'COMPARISON_CLEAR' });
-  }
-};
-export const startDetalize = (data, failFunction) => {
+
+export const updateAllRealties = (prerequisites, all_realties, successFunction, failFunction) => {
+  const requestData = {
+    ...prerequisites,
+    realties: [
+      ...all_realties.map((rlt) => realtySifter(rlt))
+    ]
+  };
   return dispatch => {
     requestHandler({
       method: 'post',
-      url: '/expand',
-      data,
+      url: '/compare',
+      requestData,
       actions: {
-        start: () => dispatch({ type: 'DETALIZE_START' }),
-        success: (data) => dispatch({ type: 'DETALIZE_SUCCESS', data }),
+        success: (response) => {
+          const updatedRealties = response;
+          dispatch({ type: 'UPDATE_ALL_REALTIES', updatedRealties })
+          if (successFunction && typeof successFunction === 'function') successFunction(response);
+        },
         fail: (error) => {
-          dispatch({ type: 'DETALIZE_FAIL' });
-          if (typeof failFunction === 'function') {
-            failFunction(error);
-          }
+          dispatch({ type: 'UPDATE_ALL_REALTIES_FAIL' });
+          if (failFunction && typeof failFunction === 'function') failFunction(error);
         }
       }
     });
   };
 };
-export const clearDetalization = () => {
+
+export const deleteRealty = (id) => {
   return dispatch => {
-    dispatch({ type: 'DETALIZATION_CLEAR' });
-  }
-}
+    dispatch({ type: 'DELETE_REALTY', id })
+  };
+};
+
+export const deleteAllRealties = () => {
+  return dispatch => {
+    dispatch({ type: 'DELETE_ALL_REALTIES' })
+  };
+};

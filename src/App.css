@@ -6,7 +6,7 @@
   background-color: #55aaee;
 }
 .Comparison {
-  min-width: 70%;
+  /* min-width: 70%; */
 }
 
 .App {
@@ -16,7 +16,7 @@
 .App-main {
   background-color: #282c34;
   min-height: 100vh;
-  display: flex;
+  /* display: flex; */
   justify-content: center;
   /* flex-direction: column; */
   /* align-items: center; */
