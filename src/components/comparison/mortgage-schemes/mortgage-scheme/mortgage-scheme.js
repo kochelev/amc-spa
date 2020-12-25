@@ -1,5 +1,4 @@
 import React, { useState, Fragment } from 'react';
-import SetMortgageScheme from './set-mortgage-scheme/set-mortgage-scheme';
 
 const MortgageScheme = (props) => {
 
@@ -44,16 +43,6 @@ const MortgageScheme = (props) => {
     setIsSettingMortgageScheme(true);
   }
 
-  if (isSettingMortgageScheme) {
-    return (
-      <Fragment>
-        <button onClick={(event) => {setIsSettingMortgageScheme(false)}} >Close</button><br/>
-        <SetMortgageScheme
-          scheme={props.scheme} />
-      </Fragment>
-    )
-  }
-    
   return (
     <div className="MortgageScheme">
       <h4>Scheme id: {props.scheme.id}</h4>

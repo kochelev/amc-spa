@@ -1,31 +1,36 @@
 import React, { useState, useEffect, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { updatePrerequisites, updateAllRealties } from '../store/actions';
 import { useForm } from 'react-hook-form';
 import deepEqual from 'deep-equal';
-import './set-mortgage-scheme.css';
+
+const scheduleConverter = (schedule) => {
+  const result = {}
+  schedule.forEach((period, index) => {
+    const newKey = 'period_' + index;
+    result[newKey] = {
+      interest_rate: period.interest_rate.toString(),
+      months: period.months.toString(),
+    }
+  });
+  return result;
+}
 
 const SetMortgageScheme = (props) => {
-
-  const scheduleConverter = (schedule) => {
-    const result = {}
-    schedule.forEach((period, index) => {
-      const newKey = 'period_' + index;
-      result[newKey] = {
-        interest_rate: period.interest_rate.toString(),
-        months: period.months.toString(),
-      }
-    });
-    return result;
-  }
+  
+  const data = props.data ? props.data : null;
 
   const defaultValues = {
-    title: props.scheme.title,
-    initial_payment_percent: props.scheme.initial_payment_percent.toString(),
-    initial_expencies: props.scheme.initial_expencies.toString(),
-    schedule: scheduleConverter(props.scheme.schedule)
+    title: data ? data.title : '',
+    initial_payment_percent: data ? data.initial_payment_percent.toString() : '',
+    initial_expencies: data ? data.initial_expencies.toString() : '',
+    schedule: data ? scheduleConverter(data.schedule) : {},
   }
 
   const [ isFormChanged, setIsFormChanged ] = useState(false);
   const [ currentFormState, setCurrentFormState ] = useState(defaultValues);
+
   const {
     register, unregister,
     handleSubmit, errors, reset,
@@ -42,21 +47,21 @@ const SetMortgageScheme = (props) => {
     if (deepEqual(defaultValues, currentValues)) setIsFormChanged(false);
     else setIsFormChanged(true);
   }, [formValues]); // eslint-disable-line react-hooks/exhaustive-deps
-  
 
   const addPeriod = (event) => {
     event.preventDefault();
     const newCurrentFormState = currentFormState;
     const newPeriodId = 'period_' + Math.round(Math.random() * 10 ** 9);
     newCurrentFormState.schedule[newPeriodId] = {
-      interest_rate: '',
-      months: ''
+      interest_rate: '13',
+      months: '11'
     }
+    register('schedule["' + newPeriodId + '"].interest_rate', { required: true, pattern: RegExpList.posFloat, maxLength: 4 });
+    register('schedule["' + newPeriodId + '"].months', { required: true, pattern: RegExpList.posInt, max: 1200 });
     setCurrentFormState(newCurrentFormState);
-    register('schedule["' + newPeriodId + '"].interest_rate', { required: true });
-    register('schedule["' + newPeriodId + '"].months', { required: true });
-    setValue('schedule["' + newPeriodId + '"].interest_rate', '11', { shouldValidate: true });
-    setValue('schedule["' + newPeriodId + '"].months', '1', { shouldValidate: true });
+    // Make this after setCurrentFormState method execution
+    setValue('schedule["' + newPeriodId + '"].interest_rate', '13', { shouldValidate: true });
+    setValue('schedule["' + newPeriodId + '"].months', '11', { shouldValidate: true });
   }
 
   const deletePeriod = (event, key) => {
@@ -79,8 +84,56 @@ const SetMortgageScheme = (props) => {
   }
 
   const onSubmit = formdata => {
-    unregister('initial_payment_percent');
-    console.log('FORMDATA: ', formdata);
+    const mortgageScheme = {
+      'id': data ? data.id : Math.round(Math.random() * 10 ** 9),
+      'title': formdata.title,
+      'initial_payment_percent': parseFloat(formdata.initial_payment_percent),
+      'initial_expencies': parseInt(formdata.initial_expencies),
+      'schedule': Object.values(formdata.schedule).map((period) => {
+        return {
+          interest_rate: parseFloat(period.interest_rate),
+          months: parseInt(period.months)
+        }}
+      )
+    };
+    let mortgageSchemes = [];
+    if (data) {
+      const index = props.prerequisites.mortgage_schemes.findIndex((element) => element.id === data.id);
+      mortgageSchemes = props.prerequisites.mortgage_schemes;
+      mortgageSchemes[index] = mortgageScheme;
+    } else {
+      mortgageSchemes = props.prerequisites.mortgage_schemes;
+      mortgageSchemes.push(mortgageScheme);
+    }
+
+    const prerequisites = {
+      ...props.prerequisites,
+      mortgage_schemes: mortgageSchemes,
+    };
+
+    let afterFunction = () => {
+      props.close('mortgageScheme');
+      //props.setIsSettingPrerequisites(false);
+    }
+
+    if (props.realtyList && props.realtyList.length > 0) {
+      afterFunction = (x) => {
+        // props.setIsPending(true);
+        props.updateAllRealties(x, props.realtyList,
+          () => {
+            // props.setIsPending(false);
+            // props.setIsSettingPrerequisites(false);
+            alert('close');
+            props.close('mortgageScheme');
+          },
+          (error) => {
+            // props.setIsPending(false);
+            alert(error);
+          }
+        );
+      }
+    }
+    props.updatePrerequisites(prerequisites, afterFunction);
   }
 
   const RegExpList = {
@@ -90,7 +143,8 @@ const SetMortgageScheme = (props) => {
 
   return (
     <div className="SetMortgageScheme">
-      <h4>Scheme id: {props.scheme.id}</h4>
+      <h4>Scheme id: {props.scheme ? props.scheme.id : '—'}</h4>
+      <button onClick={(event) => props.close('mortgageScheme', event)}>Close</button>
       <form onSubmit={handleSubmit(onSubmit)}>
         
         <label>Title*:</label>
@@ -99,7 +153,7 @@ const SetMortgageScheme = (props) => {
         {errors.title && errors.title.type === "maxLength" && (<Fragment><span>Max length: 100 symbols</span><br/></Fragment>)}
 
         <label>Initial Payment*:</label>
-        <input name="initial_payment_percent" type="text" ref={register({ required: true, pattern: RegExpList.posInt })} /><span>any currency</span><br/>
+        <input name="initial_payment_percent" type="text" ref={register({ required: true, pattern: RegExpList.posFloat })} /><span>any currency</span><br/>
         {errors.initial_payment_percent && errors.initial_payment_percent.type === "required" && (<Fragment><span>This field is required!</span><br/></Fragment>)}
         {errors.initial_payment_percent && errors.initial_payment_percent.type === "pattern" && (<Fragment><span>Doesn't fit pattern</span><br/></Fragment>)}
         
@@ -169,4 +223,26 @@ const SetMortgageScheme = (props) => {
   );
 }
 
-export default SetMortgageScheme;
+const mapStateToProps = state => {
+  return {
+    prerequisites: state.prerequisites,
+    realtyList: state.realtyList,
+    isRealtyListUpdated: state.isRealtyListUpdated,
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    updatePrerequisites: (...args) => dispatch(updatePrerequisites(...args)),
+    updateAllRealties: (...args) => dispatch(updateAllRealties(...args)),
+  };
+};
+
+SetMortgageScheme.propTypes = {
+  isPending: PropTypes.bool.isRequired,
+  setIsPending: PropTypes.func.isRequired,
+  close: PropTypes.func.isRequired,
+  data: PropTypes.object
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(SetMortgageScheme);

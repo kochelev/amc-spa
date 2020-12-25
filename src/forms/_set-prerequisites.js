@@ -2,23 +2,27 @@
 // TODO: use any UI kit library
 
 import React, { useState, useEffect, Fragment } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { updatePrerequisites, updateAllRealties } from '../../../store/actions';
+import { updatePrerequisites, updateAllRealties } from '../store/actions';
 import { useForm } from "react-hook-form";
-// import './set-prerequisites.css';
 
-import * as prerequisites from '../../../testdata/prerequisites';
+import Button from '@material-ui/core/Button';
+
+import * as prerequisites from '../testdata/prerequisites';
 
 const SetPrerequisites = (props) => {
 
+  const data = props.prerequisites ? props.prerequisites : null;
+
   const defaultValues = {
-    current_savings: props.prerequisites.personal_info.current_savings.toString(),
-    month_income: props.prerequisites.personal_info.month_income.toString(),
-    month_rent: props.prerequisites.personal_info.month_rent.toString(),
-    deal_month_start: props.prerequisites.personal_info.deal_month_start.toString(),
-    deal_month_finish: props.prerequisites.personal_info.deal_month_finish.toString(),
-    interest_rate: props.prerequisites.credit_scheme.interest_rate.toString(),
-    months: props.prerequisites.credit_scheme.months.toString(),
+    current_savings: data ? data.personal_info.current_savings.toString() : null,
+    month_income: data ? data.personal_info.month_income.toString() : null,
+    month_rent: data ? data.personal_info.month_rent.toString() : null,
+    deal_month_start: data ? data.personal_info.deal_month_start.toString() : null,
+    deal_month_finish: data ? data.personal_info.deal_month_finish.toString() : null,
+    interest_rate: data ? data.credit_scheme.interest_rate.toString() : null,
+    months: data ? data.credit_scheme.months.toString() : null,
   };
 
   const {
@@ -54,7 +58,7 @@ const SetPrerequisites = (props) => {
     };
 
     let afterFunction = () => {
-      props.setIsSettingPrerequisites(false);
+      props.close('prerequisites');
     }
 
     if (props.realtyList && props.realtyList.length > 0) {
@@ -63,8 +67,7 @@ const SetPrerequisites = (props) => {
         props.updateAllRealties(x, props.realtyList,
           () => {
             props.setIsPending(false);
-            props.setIsSettingPrerequisites(false);
-            console.log('close');
+            props.close('prerequisites');
           },
           (error) => {
             props.setIsPending(false);
@@ -75,11 +78,6 @@ const SetPrerequisites = (props) => {
     }
     props.updatePrerequisites(prerequisites, afterFunction);
   };
-
-  const closeDialog = (event) => {
-    event.preventDefault();
-    props.setIsSettingPrerequisites(false);
-  }
 
   const RegExpList = {
       posInt: new RegExp(`^[1-9][0-9]*$`),
@@ -95,14 +93,14 @@ const SetPrerequisites = (props) => {
       setValue(`${key}`, variant.credit_scheme[key], { shouldDirty: true });
     }
   };
-
+  
   return (
     <Fragment>
       <div className="SetPrerequisites">
         <h2>Edit Prerequisites!</h2>
         {isFormChanged ? 'Changed' : 'Original'}
         {props.isPending ? 'Pending...' : null }
-        <button onClick={(event) => closeDialog(event)}>closeDialog</button>
+        <button onClick={(event) => props.close('prerequisites', event)}>closeDialog</button>
         <form onSubmit={handleSubmit(onSubmit)}>
           
           <h3>Personal Information</h3>
@@ -144,10 +142,11 @@ const SetPrerequisites = (props) => {
           {errors.months && errors.months.type === "required" && (<Fragment><span>This field is required!</span><br/></Fragment>)}
           {errors.months && errors.months.type === "pattern" && (<Fragment><span>Doesn't fit pattern</span><br/></Fragment>)}
 
-          <input
+          <Button
             type="submit"
-            value="Update"
-            disabled={!isFormChanged} /><br/>
+            variant="contained"
+            color="primary"
+            disabled={!isFormChanged}>Update</Button>
 
           <hr/>
           <button onClick={(event) => putDataIntoForm(prerequisites.prerequisites1, event)}>Prerequisites 1</button><br/>
@@ -174,6 +173,12 @@ const mapDispatchToProps = dispatch => {
     updatePrerequisites: (...args) => dispatch(updatePrerequisites(...args)),
     updateAllRealties: (...args) => dispatch(updateAllRealties(...args)),
   };
+};
+
+SetPrerequisites.propTypes = {
+  isPending: PropTypes.bool.isRequired,
+  setIsPending: PropTypes.func.isRequired,
+  close: PropTypes.func.isRequired
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(SetPrerequisites);

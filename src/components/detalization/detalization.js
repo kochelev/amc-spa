@@ -76,3 +76,26 @@ const mapDispatchToProps = dispatch => {
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(detalization);
+
+  // const detalize = (event, realtyId, schemeId, save_credit) => {
+  //   event.preventDefault();
+  //   console.log('detalize: ', realtyId, schemeId, save_credit);
+  //   const requestData = {
+  //     'personal_info': {
+  //       'month_income': props.data.personalInfo.monthIncome,
+  //       'current_savings': props.data.personalInfo.currentSavings,
+  //       'month_rent': props.data.personalInfo.monthRent
+  //     },
+  //     'credit_scheme': {
+  //       'interest_rate': props.data.creditScheme.interestRate,
+  //       'months': props.data.creditScheme.totalMonths
+  //     },
+  //     'mortgage_scheme': props.data.mortgageSchemes[schemeId],
+  //     'realty': props.data.realties[realtyId],
+  //     'plan': props.comparison[realtyId].schemes[schemeId][save_credit]
+  //   };
+  //   props.startDetalize(requestData, (error) => {
+  //       console.log(error);
+  //       alert('Boom');
+  //   });
+  // };

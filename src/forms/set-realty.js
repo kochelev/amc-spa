@@ -2,27 +2,29 @@
 // TODO: use any UI kit library
 
 import React, { useState, useEffect, Fragment } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { addRealty, updateRealty } from '../../../store/actions';
+import { addRealty, updateRealty } from '../store/actions';
 import { useForm } from "react-hook-form";
-import './set-realty.css';
 
-import * as realties from '../../../testdata/realties';
+import * as realties from '../testdata/realties';
 
 const SetRealty = (props) => {
+  
+  const data = props.data ? props.data : null;
 
   const defaultValues = {
-    title:                  props.realty ? props.realty.title : '',
-    area:                   props.realty ? props.realty.area.toString() : '',
-    has_mall:               props.realty ? props.realty.has_mall.toString() : '',
-    subway_distance:        props.realty ? props.realty.subway_distance.toString() : '',
-    region:                 props.realty ? props.realty.region : '',
-    cost:                   props.realty ? props.realty.cost.toString() : '',
-    is_primary:             props.realty ? props.realty.is_primary.toString() : '',
-    gotkeys_month:          props.realty ? props.realty.gotkeys_month.toString() : '',
-    repairing_expencies:    props.realty ? props.realty.repairing.expencies.toString() : '',
-    repairing_months:       props.realty ? props.realty.repairing.months.toString() : '',
-    settling_expencies:     props.realty ? props.realty.settling_expencies.toString() : ''
+    title:                  data ? data.title : '',
+    area:                   data && data.area ? data.area.toString() : '',
+    has_mall:               data && data.has_mall ? data.has_mall.toString() : '',
+    subway_distance:        data && data.subway_distance ? data.subway_distance.toString() : '',
+    region:                 data && data.region ? data.region : '',
+    cost:                   data ? data.cost.toString() : '',
+    is_primary:             data ? data.is_primary.toString() : '',
+    gotkeys_month:          data ? data.gotkeys_month.toString() : '',
+    repairing_expencies:    data ? data.repairing.expencies.toString() : '',
+    repairing_months:       data ? data.repairing.months.toString() : '',
+    settling_expencies:     data ? data.settling_expencies.toString() : ''
   };
 
   const {
@@ -45,7 +47,7 @@ const SetRealty = (props) => {
   const onSubmit = formdata => {
     if (!props.prerequisites) return;
     const realty = {
-      'id': props.realty ? props.realty.id : Math.round(Math.random() * 10 ** 9),
+      'id': data ? data.id : Math.round(Math.random() * 10 ** 9),
       'title': formdata.title,
       'area': parseFloat(formdata.area),
       'has_mall': Boolean(formdata.has_mall),
@@ -61,16 +63,13 @@ const SetRealty = (props) => {
       'settling_expencies': parseInt(formdata.settling_expencies)
     };
     props.setIsPending(true);
-    if (props.realty) {
+    if (data) {
         props.updateRealty(
           props.prerequisites,
           realty,
           () => {
             props.setIsPending(false);
-            props.setIsSettingRealty({
-              isShown: false,
-              realtyId: null
-            });
+            props.close('realty');
           },
           (error) => {
             props.setIsPending(false);
@@ -83,10 +82,7 @@ const SetRealty = (props) => {
         realty,
         () => {
           props.setIsPending(false);
-          props.setIsSettingRealty({
-            isShown: false,
-            realtyId: null
-          });
+          props.close('realty');
         },
         (error) => {
           props.setIsPending(false);
@@ -107,14 +103,6 @@ const SetRealty = (props) => {
     }
   };
 
-  const closeDialog = (event) => {
-    event.preventDefault();
-    props.setIsSettingRealty({
-        isShown: false,
-        realtyId: null
-    });
-  }
-
   const RegExpList = {
       posInt: new RegExp(`^[1-9][0-9]*$`),
       posFloat: new RegExp(`^[1-9][0-9]*(.[0-9])?$|^0.[1-9]$`)
@@ -125,8 +113,8 @@ const SetRealty = (props) => {
       {props.prerequisites ?
         <div className="SetRealty">
           {props.isPending ? 'Pending...' : null }
-          {props.realty ? <h2>Edit Realty Form!</h2> : <h2>Add Realty Form!</h2>}
-          <button onClick={(event) => closeDialog(event)}>closeDialog</button>
+          {data ? <h2>Edit Realty Form!</h2> : <h2>Add Realty Form!</h2>}
+          <button onClick={(event) => props.close('realty', event)}>closeDialog</button>
           <form onSubmit={handleSubmit(onSubmit)}>
             
             <label>Title*:</label>
@@ -187,7 +175,7 @@ const SetRealty = (props) => {
 
             <input
                 type="submit"
-                value={props.realty ? "Update" : "Create"}
+                value={data ? "Update" : "Create"}
                 disabled={!isFormChanged} /><br/>
 
             <hr/>
@@ -219,6 +207,13 @@ const mapDispatchToProps = dispatch => {
     addRealty: (...args) => dispatch(addRealty(...args)),
     updateRealty: (...args) => dispatch(updateRealty(...args)),
   };
+};
+
+SetRealty.propTypes = {
+  isPending: PropTypes.bool.isRequired,
+  setIsPending: PropTypes.func.isRequired,
+  close: PropTypes.func.isRequired,
+  data: PropTypes.object
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(SetRealty);
