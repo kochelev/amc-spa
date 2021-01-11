@@ -13,7 +13,7 @@ const defaultPrerequisites = {
   mortgage_schemes: [
     {
       id: 2,
-      title: 'Ипотека для семей с детьми от Сбербанка',
+      title: 'Сбер-семья',
       initial_payment_percent: 10,
       initial_expencies: 60000,
       schedule: [
@@ -29,7 +29,7 @@ const defaultPrerequisites = {
     },
     {
       id: 1,
-      title: 'Ипотека с господдержкой от Сбербанка',
+      title: 'Сбер (господдержка)',
       initial_payment_percent: 15,
       initial_expencies: 60000,
       schedule: [

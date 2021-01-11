@@ -25,7 +25,6 @@ export const addRealty = (prerequisites, realty, successFunction, failFunction) 
       ...prerequisites,
       realties: [realty]
     };
-    console.log(requestData);
     requestHandler({
       method: 'post',
       url: '/compare',

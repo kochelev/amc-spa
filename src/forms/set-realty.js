@@ -1,5 +1,4 @@
-// TODO: refactor all form
-// TODO: use any UI kit library
+// TODO: make possible to set Gotkeys Month as null
 
 import React, { useState, useEffect, Fragment } from 'react';
 import PropTypes from 'prop-types';
@@ -7,40 +6,53 @@ import { connect } from 'react-redux';
 import { addRealty, updateRealty } from '../store/actions';
 import { useForm } from "react-hook-form";
 
+// Material-UI
+
+import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Typography from '@material-ui/core/Typography';
+
+// Custom Components
+
 import * as realties from '../testdata/realties';
+import RegExpList from '../helpers/regExpList';
+import ConfiguredTextField from './fields/configuredTextField';
+import ConfiguredRadioGroup from './fields/configuredRadioGroup';
 
 const SetRealty = (props) => {
-  
-  const data = props.data ? props.data : null;
 
+  const data = props.data ? props.data : null;
+  
   const defaultValues = {
     title:                  data ? data.title : '',
-    area:                   data && data.area ? data.area.toString() : '',
-    has_mall:               data && data.has_mall ? data.has_mall.toString() : '',
-    subway_distance:        data && data.subway_distance ? data.subway_distance.toString() : '',
     region:                 data && data.region ? data.region : '',
-    cost:                   data ? data.cost.toString() : '',
     is_primary:             data ? data.is_primary.toString() : '',
+    cost:                   data ? data.cost.toString() : '',
     gotkeys_month:          data ? data.gotkeys_month.toString() : '',
     repairing_expencies:    data ? data.repairing.expencies.toString() : '',
     repairing_months:       data ? data.repairing.months.toString() : '',
-    settling_expencies:     data ? data.settling_expencies.toString() : ''
+    settling_expencies:     data ? data.settling_expencies.toString() : '',
+    area:                   data && data.area ? data.area.toString() : '',
+    subway_distance:        data && data.subway_distance ? data.subway_distance.toString() : '',
+    has_mall:               data && data.has_mall ? data.has_mall.toString() : '',
   };
 
-  const {
-    register, handleSubmit, errors, reset,
-    watch, setValue, getValues} = useForm({
-      defaultValues,
-      mode: 'onSubmit',
+  const { control, register, handleSubmit, errors, reset, watch, setValue, getValues} = useForm({
+    defaultValues,
+    mode: 'onSubmit',
+    criteriaMode: 'all',
   });
   const [ isFormChanged, setIsFormChanged ] = useState(false);
-
   const formValues = watch();
 
   useEffect(() => {
     const currentState = getValues();
     if (Object.keys(currentState).every(
-        (key) => currentState[key] === defaultValues[key])) setIsFormChanged(false);
+      (key) => currentState[key] === defaultValues[key])) setIsFormChanged(false);
     else setIsFormChanged(true);
   }, [formValues]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -69,7 +81,7 @@ const SetRealty = (props) => {
           realty,
           () => {
             props.setIsPending(false);
-            props.close('realty');
+            props.handleClose();
           },
           (error) => {
             props.setIsPending(false);
@@ -82,7 +94,7 @@ const SetRealty = (props) => {
         realty,
         () => {
           props.setIsPending(false);
-          props.close('realty');
+          props.handleClose();
         },
         (error) => {
           props.setIsPending(false);
@@ -95,104 +107,159 @@ const SetRealty = (props) => {
   const putDataIntoForm = (variant, event = null) => {
     if (event) event.preventDefault();
     for (const key in variant) {
-      if (key === 'repairing') {
-        setValue('repairing_expencies', variant.repairing.expencies, { shouldDirty: true });
-        setValue('repairing_months', variant.repairing.months, { shouldDirty: true });
+      if (variant[key] === null) {
+        setValue(`${key}`, '', { });
+        continue;
       }
-      setValue(`${key}`, variant[key], { shouldDirty: true });
+      if (key === 'repairing') {
+        setValue('repairing_expencies', variant.repairing.expencies, { });
+        setValue('repairing_months', variant.repairing.months, { });
+        continue;
+      }
+      setValue(`${key}`, variant[key].toString(), { shouldDirty: true, shouldValidate: true });
     }
   };
 
-  const RegExpList = {
-      posInt: new RegExp(`^[1-9][0-9]*$`),
-      posFloat: new RegExp(`^[1-9][0-9]*(.[0-9])?$|^0.[1-9]$`)
+  const textFieldProps = {
+    errors,
+    register,
+    disabled: props.isPending,
+  }
+
+  const radioGroupProps = {
+    errors,
+    control,
+    disabled: !props.isPending,
   }
 
   return (
-    <Fragment>
-      {props.prerequisites ?
-        <div className="SetRealty">
-          {props.isPending ? 'Pending...' : null }
-          {data ? <h2>Edit Realty Form!</h2> : <h2>Add Realty Form!</h2>}
-          <button onClick={(event) => props.close('realty', event)}>closeDialog</button>
-          <form onSubmit={handleSubmit(onSubmit)}>
+    props.prerequisites ? (
+      <Fragment>
+        <DialogTitle id="form-dialog-title" disableTypography={true}>
+          <Typography variant="h5" noWrap>
+            Realty Params
+          </Typography>
+        </DialogTitle>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <DialogContent dividers={true}>
+
+            <ConfiguredTextField {...textFieldProps}
+              name="title"
+              label="Title"
+              autoFocus={true}
+              required={true}
+              helperText="helper text"
+              maxLength={30} />
+
+            <ConfiguredTextField {...textFieldProps}
+              name="region"
+              label="Link"
+              maxLength={2000} />
             
-            <label>Title*:</label>
-            <input name="title" type="text" ref={register({ required: true, maxLength: 30 })} /><br/>
-            {errors.title && errors.title.type === "required" && (<Fragment><span>This field is required!</span><br/></Fragment>)}
-            {errors.title && errors.title.type === "maxLength" && (<Fragment><span>Max length: 30 symbols</span><br/></Fragment>)}
+            <ConfiguredRadioGroup {...radioGroupProps}
+              name="is_primary"
+              label="Is realty primary?"
+              required={true}
+              values={{
+                true: "Yes",
+                false: "No",
+              }} />
 
-            <label>Area:</label>
-            <input name="area" type="text" ref={register({ pattern: RegExpList.posFloat })} /><span>square meters</span><br/>
-            {errors.area && errors.area.type === "pattern" && (<Fragment><span>Example: 33 or 56.4</span><br/></Fragment>)}
+            <ConfiguredTextField {...textFieldProps}
+              name="cost"
+              label="Realty cost"
+              required={true}
+              pattern={RegExpList.posInt}
+              endAdornment="any currency" />
+                  
+            <ConfiguredTextField {...textFieldProps}
+              name="gotkeys_month"
+              label="Got keys month"
+              required={true}
+              pattern={RegExpList.posInt}
+              endAdornment="months" />
 
-            <label>Has mall:</label>
-            <select name="has_mall" ref={register} defaultValue="">  
-              <option value="">Doesn't matter</option>
-              <option value="true">Has</option>
-              <option value="false">Doesn't have</option>
-            </select><br/>
+            <ConfiguredTextField {...textFieldProps}
+              name="repairing_expencies"
+              label="Repairing expencies"
+              required={true}
+              pattern={RegExpList.posInt}
+              endAdornment="any currency" />
 
-            <label>Subway distance:</label>
-            <input name="subway_distance" type="text" ref={register({ pattern: RegExpList.posInt })} /><span>minutes by feet</span><br/>
-            {errors.subway_distance && errors.subway_distance.type === "pattern" && (<Fragment><span>Doesn't fit pattern</span><br/></Fragment>)}
+            <ConfiguredTextField {...textFieldProps}
+              name="repairing_months"
+              label="Expected repairing duration"
+              required={true}
+              pattern={RegExpList.posInt}
+              endAdornment="months" />
 
-            <label>Region:</label>
-            <input name="region" type="text" ref={register} /><br/>
+            <ConfiguredTextField {...textFieldProps}
+              name="settling_expencies"
+              label="Settling expencies"
+              required={true}
+              pattern={RegExpList.posInt}
+              endAdornment="any currency" />
 
-            <label>Cost*:</label>
-            <input name="cost" type="text" ref={register({ pattern: RegExpList.posInt })} /><span>any currency</span><br/>
-            {errors.cost && errors.cost.type === "required" && (<Fragment><span>This field is required!</span><br/></Fragment>)}
-            {errors.cost && errors.cost.type === "pattern" && (<Fragment><span>Doesn't fit pattern</span><br/></Fragment>)}
+            <Box css={{ p: '40px 0 20px' }}>
 
-            <label>Type of realty*:</label>
-            <select name="is_primary" ref={register({ required: true })} defaultValue="">  
-              <option value="">Select type</option>
-              <option value="true">Primary</option>
-              <option value="false">Secondary</option>
-            </select><br/>
-            
-            {/* Is necessary only for primary realty */}
-            <label>When to recieve keys (in months):</label>
-            <input name="gotkeys_month" type="text" ref={register({ pattern: RegExpList.posInt })} /><span>months</span><br/>
-            {errors.gotkeys_month && errors.gotkeys_month.type === "required" && (<Fragment><span>This field is required!</span><br/></Fragment>)}
-            {errors.gotkeys_month && errors.gotkeys_month.type === "pattern" && (<Fragment><span>Doesn't fit pattern</span><br/></Fragment>)}
+              <Typography variant="h6" noWrap>
+                Additional Infromation
+              </Typography>
 
-            <label>Repairing expencies*:</label>
-            <input name="repairing_expencies" type="text" ref={register({ required: true, pattern: RegExpList.posInt })} /><span>any currency</span><br/>
-            {errors.repairing_expencies && errors.repairing_expencies.type === "required" && (<Fragment><span>This field is required!</span><br/></Fragment>)}
-            {errors.repairing_expencies && errors.repairing_expencies.type === "pattern" && (<Fragment><span>Doesn't fit pattern</span><br/></Fragment>)}
+              <DialogContentText>
+                Fill in basic information about realty and additional if needed.
+              </DialogContentText>
 
-            <label>Repairing duration in months*:</label>
-            <input name="repairing_months" type="text" ref={register({ required: true, pattern: RegExpList.posInt })} /><span>months</span><br/>
-            {errors.repairing_months && errors.repairing_months.type === "required" && (<Fragment><span>This field is required!</span><br/></Fragment>)}
-            {errors.repairing_months && errors.repairing_months.type === "pattern" && (<Fragment><span>Doesn't fit pattern</span><br/></Fragment>)}
+              <ConfiguredTextField {...textFieldProps}
+                name="area"
+                label="Area"
+                pattern={RegExpList.posFloat}
+                endAdornment="square meters" />
+              
+              <ConfiguredTextField
+                {...textFieldProps}
+                name="subway_distance"
+                label="Subway distance"
+                pattern={RegExpList.posInt}
+                endAdornment="minutes by feet" />
 
-            <label>Settling expencies*:</label>
-            <input name="settling_expencies" type="text" ref={register({ required: true, pattern: RegExpList.posInt })} /><span>any currency</span><br/>
-            {errors.settling_expencies && errors.settling_expencies.type === "required" && (<Fragment><span>This field is required!</span><br/></Fragment>)}
-            {errors.settling_expencies && errors.settling_expencies.type === "pattern" && (<Fragment><span>Doesn't fit pattern</span><br/></Fragment>)}
+              <ConfiguredRadioGroup {...radioGroupProps}
+                name="has_mall"
+                label="Has shopping mall?"
+                helperText="Is there any shopping mall within walking distance?"
+                values={{
+                  "": "Don't know",
+                  true: "Yes",
+                  false: "No",
+                }} />
 
-            <input
-                type="submit"
-                value={data ? "Update" : "Create"}
-                disabled={!isFormChanged} /><br/>
+            </Box>
 
-            <hr/>
-            
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={props.handleClose}
+              color="primary">Cancel</Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={!isFormChanged}>{!props.isPending ? data ? "Update" : "Create" : "Saving..."}</Button>
+          </DialogActions>
+          <DialogActions>
             <button onClick={(event) => putDataIntoForm(realties.realty1, event)}>Realty 1</button><br/>
-            <button onClick={(event) => putDataIntoForm(realties.realty2, event)}>Realty 2</button><br/>
+            <button onClick={(event) => putDataIntoForm(realties.realty2, event)}>Incorrect</button><br/>
             <button onClick={(event) => putDataIntoForm(realties.realty3, event)}>Realty 3</button><br/>
             <button onClick={(event) => putDataIntoForm(realties.realty4, event)}>Realty 4</button><br/>
             <button onClick={(event) => putDataIntoForm(realties.realty5, event)}>Realty 5</button><br/>
             <button onClick={(event) => {event.preventDefault(); reset(defaultValues)}}>Cancel changes!</button><br/>
             <button onClick={(event) => {event.preventDefault(); reset()}}>Clear all!</button>
-          </form>
-        </div>
-      : null}
-    </Fragment>
+          </DialogActions>
+        </form>
+      </Fragment>
+    ) : null
   );
-};
+}
 
 const mapStateToProps = state => {
   return {
@@ -210,10 +277,10 @@ const mapDispatchToProps = dispatch => {
 };
 
 SetRealty.propTypes = {
-  isPending: PropTypes.bool.isRequired,
+  isPending:    PropTypes.bool.isRequired,
   setIsPending: PropTypes.func.isRequired,
-  close: PropTypes.func.isRequired,
-  data: PropTypes.object
+  handleClose:  PropTypes.func.isRequired,
+  data:         PropTypes.object,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(SetRealty);

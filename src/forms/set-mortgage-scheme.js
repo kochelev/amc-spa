@@ -2,8 +2,43 @@ import React, { useState, useEffect, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { updatePrerequisites, updateAllRealties } from '../store/actions';
-import { useForm } from 'react-hook-form';
+import { useForm } from "react-hook-form";
 import deepEqual from 'deep-equal';
+
+// Material-UI
+
+import Grid from '@material-ui/core/Grid';
+import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Typography from '@material-ui/core/Typography';
+import AddIcon from '@material-ui/icons/Add';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
+
+// Custom Components
+
+import RegExpList from '../helpers/regExpList';
+import ConfiguredTextField from './fields/configuredTextField';
+
+// Material-UI
+
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles(theme => ({
+  period: {
+    padding: theme.spacing(2),
+    margin: '20px 0',
+    border: '1px solid rgba(0,0,0,0.1)',
+    display: 'flex',
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+}));
 
 const scheduleConverter = (schedule) => {
   const result = {}
@@ -19,27 +54,24 @@ const scheduleConverter = (schedule) => {
 
 const SetMortgageScheme = (props) => {
   
+  const classes = useStyles();
+  
   const data = props.data ? props.data : null;
 
   const defaultValues = {
-    title: data ? data.title : '',
-    initial_payment_percent: data ? data.initial_payment_percent.toString() : '',
-    initial_expencies: data ? data.initial_expencies.toString() : '',
-    schedule: data ? scheduleConverter(data.schedule) : {},
+    title:                    data ? data.title : '',
+    initial_payment_percent:  data ? data.initial_payment_percent.toString() : '',
+    initial_expencies:        data ? data.initial_expencies.toString() : '',
+    schedule:                 data ? scheduleConverter(data.schedule) : {},
   }
 
+  const { register, unregister, handleSubmit, errors, watch, setValue, getValues} = useForm({
+    defaultValues,
+    mode: 'onSubmit',
+    criteriaMode: 'all',
+  });
   const [ isFormChanged, setIsFormChanged ] = useState(false);
   const [ currentFormState, setCurrentFormState ] = useState(defaultValues);
-
-  const {
-    register, unregister,
-    handleSubmit, errors, reset,
-    watch, setValue, getValues} = useForm({
-      defaultValues,
-      mode: 'onSubmit',
-      criteriaMode: 'all'
-  });
-  
   const formValues = watch();
 
   useEffect(() => {
@@ -112,22 +144,20 @@ const SetMortgageScheme = (props) => {
     };
 
     let afterFunction = () => {
-      props.close('mortgageScheme');
-      //props.setIsSettingPrerequisites(false);
+      props.handleClose();
+      // props.setIsSettingPrerequisites(false);
     }
 
     if (props.realtyList && props.realtyList.length > 0) {
       afterFunction = (x) => {
-        // props.setIsPending(true);
+        props.setIsPending(true);
         props.updateAllRealties(x, props.realtyList,
           () => {
-            // props.setIsPending(false);
-            // props.setIsSettingPrerequisites(false);
-            alert('close');
-            props.close('mortgageScheme');
+            props.setIsPending(false);
+            props.handleClose();
           },
           (error) => {
-            // props.setIsPending(false);
+            props.setIsPending(false);
             alert(error);
           }
         );
@@ -136,90 +166,129 @@ const SetMortgageScheme = (props) => {
     props.updatePrerequisites(prerequisites, afterFunction);
   }
 
-  const RegExpList = {
-    posInt: new RegExp(`^[1-9][0-9]*$`),
-    posFloat: new RegExp(`^[1-9][0-9]*(.[0-9])?$|^0.[1-9]$`)
+  const textFieldProps = {
+    errors,
+    register,
+    disabled: props.isPending,
   }
 
   return (
-    <div className="SetMortgageScheme">
-      <h4>Scheme id: {props.scheme ? props.scheme.id : '—'}</h4>
-      <button onClick={(event) => props.close('mortgageScheme', event)}>Close</button>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        
-        <label>Title*:</label>
-        <input name="title" type="text" ref={register({ required: true, maxLength: 100 })} /><br/>
-        {errors.title && errors.title.type === "required" && (<Fragment><span>This field is required!</span><br/></Fragment>)}
-        {errors.title && errors.title.type === "maxLength" && (<Fragment><span>Max length: 100 symbols</span><br/></Fragment>)}
+    props.prerequisites ? (
+      <Fragment>
+        <DialogTitle id="form-dialog-title" disableTypography={true}>
+          <Typography variant="h5" noWrap>
+            Mortgage Scheme
+          </Typography>
+        </DialogTitle>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <DialogContent dividers={true}>
 
-        <label>Initial Payment*:</label>
-        <input name="initial_payment_percent" type="text" ref={register({ required: true, pattern: RegExpList.posFloat })} /><span>any currency</span><br/>
-        {errors.initial_payment_percent && errors.initial_payment_percent.type === "required" && (<Fragment><span>This field is required!</span><br/></Fragment>)}
-        {errors.initial_payment_percent && errors.initial_payment_percent.type === "pattern" && (<Fragment><span>Doesn't fit pattern</span><br/></Fragment>)}
-        
-        <label>Initial Expencies*:</label>
-        <input name="initial_expencies" type="text" ref={register({ required: true, pattern: RegExpList.posInt })} /><span>any currency</span><br/>
-        {errors.initial_expencies && errors.initial_expencies.type === "required" && (<Fragment><span>This field is required!</span><br/></Fragment>)}
-        {errors.initial_expencies && errors.initial_expencies.type === "pattern" && (<Fragment><span>Doesn't fit pattern</span><br/></Fragment>)}
-        
-        {Object.entries(currentFormState.schedule).map(([key, period], index) => {
-          return (
-            <div key={key}>
-              <h5>Period — key: {key} | index: {index}</h5>
-              <button onClick={(event) => deletePeriod(event, key)} >Delete Period</button><br/>
-              
-              <label>Interest Rates*:</label>
-              <input name={'schedule.' + key + '.interest_rate'}
-                type="text" ref={register({ required: true, pattern: RegExpList.posFloat, maxLength: 4 })} />
-              <span>any currency</span><br/>
-              
-              {errors && errors.schedule && errors.schedule[key] &&
-                errors.schedule[key].interest_rate ?
-                <ul>
-                  {Object.keys(errors.schedule[key].interest_rate.types).map((k) => {
-                    const errorMessages = {
-                      required: 'Required!',
-                      pattern: 'Does\'t fit the mask!',
-                      maxLength: 'Too much characters!'
-                    }
-                    return (<li key={k}>{errorMessages[k]}</li>)
-                  })}
-                </ul>
-              : null }
+            <ConfiguredTextField {...textFieldProps}
+              name="title"
+              label="Title"
+              autoFocus={true}
+              required={true}
+              maxLength={100} />
 
-              <label>Months*:</label>
-              <input name={'schedule.' + key + '.months'}
-                type='text' ref={register({ required: true, pattern: RegExpList.posInt, max: 1200})} />
-              <span>any currency</span><br/>
+            <ConfiguredTextField {...textFieldProps}
+              name="initial_payment_percent"
+              label="Initial payment (percent)"
+              helperText=".....?"
+              required={true}
+              pattern={RegExpList.zeroPosFloat}
+              endAdornment="%" />
 
-              {errors && errors.schedule && errors.schedule[key] &&
-                errors.schedule[key].months ?
-                <ul>
-                  {Object.keys(errors.schedule[key].months.types).map((k) => {
-                    const errorMessages = {
-                      required: 'Required!',
-                      pattern: 'Does\'t fit the mask!',
-                      max: 'Too much months!'
-                    }
-                    return (<li key={k}>{errorMessages[k]}</li>)
-                  })}
-                </ul>
-              : null }
+            <ConfiguredTextField {...textFieldProps}
+              name="initial_expencies"
+              label="Initial Expencies"
+              helperText=".....?"
+              required={true}
+              pattern={RegExpList.zeroPosInt}
+              endAdornment="any currency" />
 
-            </div>
-          )
-        })}
+            <Box css={{ p: '40px 0 20px' }}>
 
-        <button onClick={(event) => addPeriod(event)}>Add Period</button>
-        
-        <br/>
-        <input
-          type="submit"
-          value="Save Changes"
-          disabled={(Object.keys(errors).length > 0) || !isFormChanged} /><br/>
+              <Typography variant="h6" noWrap>
+                Schedule
+              </Typography>
 
-      </form>
-    </div>
+              <DialogContentText>
+                sdfjlksdjflkjsaklfjasdkl
+              </DialogContentText>
+
+              {Object.entries(currentFormState.schedule).map(([key, period], index) => {
+                return (
+                  <Box className={classes.period} key={key}>
+                    <Box>
+                      <Typography variant="h5">{index + 1}</Typography>
+                    </Box>
+                    <Box>
+                      <Grid container spacing={3}>
+                        <Grid item xs={12} sm={6}>
+                          
+                          <ConfiguredTextField {...textFieldProps}
+                            name={'schedule.' + key + '.interest_rate'}
+                            label="Interest Rates"
+                            helperText=".....?"
+                            required={true}
+                            pattern={RegExpList.posFloat}
+                            maxLength={4}
+                            endAdornment="%" />
+
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          
+                          <ConfiguredTextField {...textFieldProps}
+                            name={'schedule.' + key + '.months'}
+                            label="Months"
+                            helperText=".....?"
+                            required={true}
+                            pattern={RegExpList.posInt}
+                            max={1200}
+                            endAdornment="months" />
+
+                        </Grid>
+                      </Grid>
+                    </Box>
+                    <Box>
+                      <IconButton
+                        className={classes.iconButton}
+                        aria-label="delete"
+                        onClick={event => deletePeriod(event, key)} >
+                          <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                )
+              })}
+
+              <Box className={classes.bottomControls}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  color="primary"
+                  onClick={event => addPeriod(event)}
+                  endIcon={<AddIcon />}>
+                    Add Period
+                </Button>
+              </Box>
+
+            </Box>
+
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={props.handleClose}
+              color="primary">Cancel</Button>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={(Object.keys(errors).length > 0) || !isFormChanged}>{!props.isPending ? data ? "Update" : "Create" : "Saving..."}</Button>
+          </DialogActions>
+        </form>
+      </Fragment>
+    ) : null
   );
 }
 
@@ -239,10 +308,10 @@ const mapDispatchToProps = dispatch => {
 };
 
 SetMortgageScheme.propTypes = {
-  isPending: PropTypes.bool.isRequired,
+  isPending:    PropTypes.bool.isRequired,
   setIsPending: PropTypes.func.isRequired,
-  close: PropTypes.func.isRequired,
-  data: PropTypes.object
+  handleClose:  PropTypes.func.isRequired,
+  data:         PropTypes.object
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(SetMortgageScheme);

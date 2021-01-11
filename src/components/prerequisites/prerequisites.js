@@ -1,24 +1,29 @@
-import React, { useState, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
 import { updatePrerequisites, updateAllRealties } from '../../store/actions';
 
+// Material-UI
+
 import { makeStyles } from '@material-ui/core/styles';
-import Divider from '@material-ui/core/Divider';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
+import Box from '@material-ui/core/Box';
+import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
+
+import TableContainer from '@material-ui/core/TableContainer';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
 import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
+import TableCell from '@material-ui/core/TableCell';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
   table: {
-    width: 259,
+    width: '100%',
   },
-});
+  headline: {
+    padding: theme.spacing(2),
+  }
+}));
 
 const Prerequisites = (props) => {
 
@@ -52,12 +57,12 @@ const Prerequisites = (props) => {
       "value": props.prerequisites ? props.prerequisites.personal_info.month_rent : 'None'},
     { "name": "Range of months:",
       "value": (props.prerequisites ? props.prerequisites.personal_info.deal_month_start : 'None')
-      + " — " + (props.prerequisites ? props.prerequisites.personal_info.deal_month_finish : 'None') }
+      + "\u2009\u2013\u2009" + (props.prerequisites ? props.prerequisites.personal_info.deal_month_finish : 'None') }
   ]
 
   const credit_scheme = [
     { "name": "Interest rate:",
-      "value": props.prerequisites ? props.prerequisites.credit_scheme.interest_rate + '%': 'None' },
+      "value": props.prerequisites ? props.prerequisites.credit_scheme.interest_rate + '\u2009%': 'None' },
     { "name": "Total months:",
       "value": props.prerequisites ? props.prerequisites.credit_scheme.months: 'None' }
   ]
@@ -65,7 +70,9 @@ const Prerequisites = (props) => {
   return (
     <Fragment>
 
-      <Typography variant="h6" align="center" display="block">Personal Information</Typography>
+      <Box className={classes.headline}>
+        <Typography variant="h6" align="left" display="block">Personal Information</Typography>
+      </Box>
       
       <TableContainer component={Paper} elevation={0} square>
         <Table className={classes.table} size="small" aria-label="a dense table">
@@ -80,7 +87,9 @@ const Prerequisites = (props) => {
         </Table>
       </TableContainer>
       
-      <Typography variant="h6" align="center" display="block">Credit Scheme</Typography>
+      <Box className={classes.headline}>
+        <Typography variant="h6" align="left" display="block">Available Credit Scheme</Typography>
+      </Box>
 
       <TableContainer component={Paper} elevation={0} square>
         <Table className={classes.table} size="small" aria-label="a dense table">
@@ -94,13 +103,14 @@ const Prerequisites = (props) => {
           </TableBody>
         </Table>
       </TableContainer>
-
-      <Button
-        variant="outlined"
-        color="primary"
-        fullWidth="false"
-        onClick={(event) => setPrerequisites(event)}
-        disabled={props.isSettingPrerequisites.isShown}>Edit</Button>
+      
+      <Box align="left" css={{ p: '16px 16px' }}>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={(event) => setPrerequisites(event)}
+          disabled={props.isSettingPrerequisites.isShown}>Edit</Button>
+      </Box>
 
       {!props.isRealtyListUpdated ? (
         <button onClick={(event) => refteshRealties(event)}>REFRESH</button>
