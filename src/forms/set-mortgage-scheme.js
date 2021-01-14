@@ -145,20 +145,22 @@ const SetMortgageScheme = (props) => {
 
     let afterFunction = () => {
       props.handleClose();
-      // props.setIsSettingPrerequisites(false);
+      console.log('without update all realties');
     }
 
-    if (props.realtyList && props.realtyList.length > 0) {
+    if (props.prerequisites && props.realtyList && props.realtyList.length > 0) {
       afterFunction = (x) => {
         props.setIsPending(true);
         props.updateAllRealties(x, props.realtyList,
           () => {
             props.setIsPending(false);
             props.handleClose();
+            console.log('update all realties: success');
           },
           (error) => {
             props.setIsPending(false);
             alert(error);
+            console.log('update all realties: fail');
           }
         );
       }

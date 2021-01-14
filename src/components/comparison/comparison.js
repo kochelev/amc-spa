@@ -3,12 +3,9 @@
 import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
 import { updatePrerequisites, updateAllRealties, deleteRealty, deleteAllRealties } from '../../store/actions';
-import realtySifter from '../../helpers/realtySifter';
-import Realty from './realty/realty';
 
 // Material-UI
 
-import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
@@ -29,64 +26,14 @@ import TableBody from '@material-ui/core/TableBody';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 
-const useStyles = makeStyles(theme => ({
-  table: {
-    tableLayout: 'fixed',
-    minWidth: "100%",
-    '& th': {
-      textAlign: 'center',
-      padding: theme.spacing(1),
-      verticalAlign: 'middle',
-    },
-    '& td': {
-      textAlign: 'center',
-      padding: theme.spacing(1),
-    },
-  },
-  controlsColumn: {
-    textAlign: 'center',
-    padding: '4px !important',
-    width: '113px',
-  },
-  mortgagePreambula: {
-    textAlign: 'right !important',
-  },
-  expanderColumn: {
-    padding: '0 !important',
-    width: '48px',
-  },
-  description: {
-    padding: 0,
-    fontSize: '0.7rem',
-  },
-  card: {
-    backgroundColor: '#FFCC00',
-    display: 'flex',
-    justifyContent: 'space-between',
-  },
-  cardActionArea: {
-    borderRight: '1px solid rgba(0,0,0,0.1)'
-  },
-  cardContent: {
-    padding: theme.spacing(1),
-  },
-  cardActions: {
-    width: '40px',
-    padding: theme.spacing(0),
-  },
-  bottomControls: {
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItem: 'center',
-    padding: theme.spacing(2),
-  },
-  fab: {
-    position: 'fixed',
-    bottom: theme.spacing(2),
-    right: theme.spacing(2),
-  },
-}));
+// Custom Components
+
+import realtySifter from '../../helpers/realtySifter';
+import Realty from './realty/realty';
+
+// Custom Styles
+
+import useStyles from './styles';
 
 const Comparison = (props) => {
   
@@ -175,10 +122,10 @@ const Comparison = (props) => {
                           onClick={(event) => setMortgageScheme(event, scheme)}
                           disabled={props.isSettingMortgageScheme.isShown}>
                           <CardContent className={classes.cardContent}>
-                            <Typography className={classes.title} noWrap variant="subtitle2" component="p">
+                            <Typography className={classes.title} variant="subtitle2" component="p">
                               {scheme.title}
                             </Typography>
-                            <Typography className={classes.description} noWrap variant="body2" component="p" color="textSecondary">
+                            <Typography className={classes.description} variant="body2" component="p" color="textSecondary">
                               {scheme.schedule.length === 1 ? 
                                 '' + Math.round(scheme.schedule[0].months / 12, 0) + ' years for ' + scheme.schedule[0].interest_rate + '\u2009%'
                               : 'First ' + scheme.schedule[0].months + ' months for ' + scheme.schedule[0].interest_rate + '\u2009%'}
@@ -214,7 +161,9 @@ const Comparison = (props) => {
                 setRealty={(...args) => setRealty(...args)}
                 deleteRealty={(...args) => deleteRealty(...args)}
                 isSettingRealty={props.isSettingRealty}
-                setIsSettingRealty={props.setIsSettingRealty} />
+                setIsSettingRealty={props.setIsSettingRealty}
+                isDetalizationShown={props.isDetalizationShown}
+                setIsDetalizationShown={props.setIsDetalizationShown} />
             ))}
           </TableBody>
           : null}
@@ -256,10 +205,10 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    updatePrerequisites:  (...args) => dispatch(updatePrerequisites(...args)),
-    updateAllRealties:    (...args) => dispatch(updateAllRealties(...args)),
-    deleteRealty:         (...args) => dispatch(deleteRealty(...args)),
-    deleteAllRealties:    () => dispatch(deleteAllRealties()),
+    updatePrerequisites: (...args) => dispatch(updatePrerequisites(...args)),
+    updateAllRealties: (...args) => dispatch(updateAllRealties(...args)),
+    deleteRealty: (...args) => dispatch(deleteRealty(...args)),
+    deleteAllRealties: () => dispatch(deleteAllRealties()),
   };
 };
 

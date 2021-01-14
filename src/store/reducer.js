@@ -1,4 +1,5 @@
 // TODO: make reducer as a dictionary, but not switch-case statement
+// TODO: get rid of numbers in updateState function (updateState0, updateState1...)
 
 const initialState = {
     prerequisites: null,
@@ -87,11 +88,11 @@ const reducer = (state = initialState, action) => {
         case 'SET_DETALIZATION':
             const updatedState8 = {
                 ...state,
-                detalization: action.data
+                detalization: action.detalization
             };
             return handler(updatedState8);
 
-        case 'DELETE_DETALIZATION':
+        case 'CLEAR_DETALIZATION':
             const updatedState9 = {
                 ...state,
                 detalization: null

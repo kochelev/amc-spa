@@ -4,7 +4,6 @@ import { updatePrerequisites, updateAllRealties } from '../../store/actions';
 
 // Material-UI
 
-import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
@@ -16,14 +15,9 @@ import TableBody from '@material-ui/core/TableBody';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 
-const useStyles = makeStyles(theme => ({
-  table: {
-    width: '100%',
-  },
-  headline: {
-    padding: theme.spacing(2),
-  }
-}));
+// Custom Styles
+
+import useStyles from './styles';
 
 const Prerequisites = (props) => {
 
@@ -64,14 +58,14 @@ const Prerequisites = (props) => {
     { "name": "Interest rate:",
       "value": props.prerequisites ? props.prerequisites.credit_scheme.interest_rate + '\u2009%': 'None' },
     { "name": "Total months:",
-      "value": props.prerequisites ? props.prerequisites.credit_scheme.months: 'None' }
+      "value": props.prerequisites ? props.prerequisites.credit_scheme.months + ' months': 'None' }
   ]
 
   return (
     <Fragment>
 
       <Box className={classes.headline}>
-        <Typography variant="h6" align="left" display="block">Personal Information</Typography>
+        <Typography variant="h6" align="left" display="block">Personal information</Typography>
       </Box>
       
       <TableContainer component={Paper} elevation={0} square>
@@ -88,7 +82,7 @@ const Prerequisites = (props) => {
       </TableContainer>
       
       <Box className={classes.headline}>
-        <Typography variant="h6" align="left" display="block">Available Credit Scheme</Typography>
+        <Typography variant="h6" align="left" display="block">Available credit scheme</Typography>
       </Box>
 
       <TableContainer component={Paper} elevation={0} square>

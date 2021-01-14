@@ -12,7 +12,7 @@ const defaultPrerequisites = {
   },
   mortgage_schemes: [
     {
-      id: 2,
+      id: 245242248,
       title: 'Сбер-семья',
       initial_payment_percent: 10,
       initial_expencies: 60000,
@@ -28,8 +28,8 @@ const defaultPrerequisites = {
       ]
     },
     {
-      id: 1,
-      title: 'Сбер (господдержка)',
+      id: 563494521,
+      title: 'Сбер-гос.',
       initial_payment_percent: 15,
       initial_expencies: 60000,
       schedule: [

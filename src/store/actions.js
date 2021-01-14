@@ -105,3 +105,45 @@ export const deleteAllRealties = () => {
     dispatch({ type: 'DELETE_ALL_REALTIES' })
   };
 };
+
+export const setDetalization = (prerequisites, realty, schemeId, save_or_credit, successFunction, failFunction) => {
+  const requestData = {
+    personal_info: {
+      month_income: prerequisites.personal_info.month_income,
+      current_savings: prerequisites.personal_info.current_savings,
+      month_rent: prerequisites.personal_info.month_rent
+    },
+    credit_scheme: {
+      interest_rate: prerequisites.credit_scheme.interest_rate,
+      months: prerequisites.credit_scheme.months
+    },
+    mortgage_scheme: prerequisites.mortgage_schemes.find(element => element.id === parseInt(schemeId)),
+    realty: realtySifter(realty),
+    plan: realty.schemes[schemeId][save_or_credit]
+  };
+  console.log('AAAA: ', requestData);
+  return dispatch => {
+    requestHandler({
+      method: 'post',
+      url: '/expand',
+      requestData,
+      actions: {
+        success: (response) => {
+          const detalization = response;
+          dispatch({ type: 'SET_DETALIZATION', detalization })
+          if (successFunction && typeof successFunction === 'function') successFunction(response);
+        },
+        fail: (error) => {
+          dispatch({ type: 'SET_DETALIZATION_FAIL' });
+          if (failFunction && typeof failFunction === 'function') failFunction(error);
+        }
+      }
+    });
+  };
+};
+
+export const clearDetalization = () => {
+  return dispatch => {
+    dispatch({ type: 'CLEAR_DETALIZATION' })
+  };
+};

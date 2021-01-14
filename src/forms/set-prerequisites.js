@@ -1,6 +1,7 @@
 // TODO: alert(error + '\n Need to make possible save again!!!!!!!!');
 // TODO: Control if deal_date_start is less than deal_date_finish
 // TODO: Interest rates shoudl be less than 100%?
+// TODO: Pass data to that component too? Don't use prerequisites.
 
 import React, { useState, useEffect, Fragment } from 'react';
 import PropTypes from 'prop-types';
