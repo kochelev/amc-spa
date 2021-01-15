@@ -13,36 +13,12 @@ export default makeStyles(theme => ({
     },
     '& td': {
         textAlign: 'center',
-        padding: theme.spacing(1),
+        padding: 0,
     },
-  },
-  controlsColumn: {
-    textAlign: 'center',
-    padding: '4px !important',
-    width: '113px',
-  },
-  expanderColumn: {
-    padding: '0 !important',
-    width: '60px',
   },
   description: {
     padding: 0,
     fontSize: '0.7rem',
-  },
-  card: {
-    backgroundColor: '#FFCC00',
-    display: 'flex',
-    justifyContent: 'space-between',
-  },
-  cardActionArea: {
-    borderRight: '1px solid rgba(0,0,0,0.1)'
-  },
-  cardContent: {
-    padding: theme.spacing(1),
-  },
-  cardActions: {
-    width: '40px',
-    padding: theme.spacing(0),
   },
   bottomControls: {
     width: '100%',
@@ -51,9 +27,19 @@ export default makeStyles(theme => ({
     alignItems: 'center',
     padding: theme.spacing(2),
   },
-  fab: {
+  
+  addRealtyButton: {
     position: 'fixed',
     bottom: theme.spacing(2),
     right: theme.spacing(2),
+  },
+
+  descriptionRow: {
+    '& td': {
+      fontSize: '0.65rem',
+      lineHeight: '0.7rem',
+      textAlign: 'center',
+      padding: theme.spacing(0.5),
+    },
   },
 }));

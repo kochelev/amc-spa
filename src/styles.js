@@ -42,7 +42,7 @@ export default makeStyles(theme => ({
   drawerHeader: {
     display: 'flex',
     alignItems: 'start',
-    padding: theme.spacing(1, 2),
+    padding: theme.spacing(1, 1, 1, 2),
     // necessary for content to be below app bar
     ...theme.mixins.toolbar,
     justifyContent: 'space-between',
@@ -80,5 +80,10 @@ export default makeStyles(theme => ({
   iconGitHub: {
     marginRight: theme.spacing(2),
     height: 24,
-  }
+  },
+  siteName: {
+    fontSize: '1.6rem',
+    letterSpacing: '0.12rem',
+    lineHeight: '2.1rem',
+  },
 }));

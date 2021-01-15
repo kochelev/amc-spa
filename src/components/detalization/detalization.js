@@ -5,29 +5,17 @@ import { setDetalization, clearDetalization } from '../../store/actions';
 // Material-UI
 
 import Dialog from '@material-ui/core/Dialog';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItem from '@material-ui/core/ListItem';
-import List from '@material-ui/core/List';
-import Divider from '@material-ui/core/Divider';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
-
 import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-
-import Fab from '@material-ui/core/Fab';
 import Button from '@material-ui/core/Button';
-import AddIcon from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
-
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import CardActionArea from '@material-ui/core/CardActionArea';
-
+import Link from '@material-ui/core/Link';
+import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
+import LaunchIcon from '@material-ui/icons/Launch';
 import TableContainer from '@material-ui/core/TableContainer';
 import Table from '@material-ui/core/Table';
 import TableHead from '@material-ui/core/TableHead';
@@ -62,16 +50,29 @@ const Detalization = (props) => {
             <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
               <CloseIcon />
             </IconButton>
-            <Typography variant="h6" className={classes.title}>
-              Sound:{props.isDetalizationShown.data ? 
-              ' ' + props.isDetalizationShown.data.realtyId +
-              ' ' + props.isDetalizationShown.data.schemeId +
-              ' ' + props.isDetalizationShown.data.save_or_credit
-              : null}
-            </Typography>
-            <Button color="inherit" onClick={() => alert('Download CSV')}>
-              Download
-            </Button>
+            {props.isDetalizationShown.data ? (
+              <Fragment>
+                <Typography variant="h6" className={classes.title}>
+                  <Typography variant="h6">
+                    {props.isDetalizationShown.data.realty.title}
+                  </Typography>
+                  
+                  <Typography variant="body2">
+                    {props.isDetalizationShown.data.realty.is_primary ? 'Primary' : 'Secondary'} realty
+                    for {props.isDetalizationShown.data.realty.cost} (any currency)
+                    , {props.isDetalizationShown.data.realty.area} square meters 
+                  </Typography>
+                </Typography>
+                {props.isDetalizationShown.data.realty.region ? (
+                  <Link variant="body2" href={props.isDetalizationShown.data.realty.region} target="_blank">
+                    <LaunchIcon color="action" />
+                  </Link>
+                ) : null}
+                <Button color="inherit" onClick={() => alert('Download CSV')}>
+                  Download
+                </Button>
+              </Fragment>
+            ) : 'Loading...'}
           </Toolbar>
         </AppBar>
         {props.detalization ? (
@@ -80,28 +81,48 @@ const Detalization = (props) => {
             <TableHead>
               <TableRow>
                 <TableCell>Month</TableCell>
+                <TableCell>Expencies</TableCell>
+
                 <TableCell>Income</TableCell>
                 <TableCell>Rent expencies</TableCell>
                 <TableCell>Save</TableCell>
                 <TableCell>Total savings</TableCell>
                 
-                <TableCell>Int.r.</TableCell>
+                <TableCell>Int. rate</TableCell>
                 <TableCell>Mortgage minimal payment</TableCell>
                 <TableCell>Mortgage fact payment</TableCell>
                 <TableCell>Mortgage debt</TableCell>
                 
-                <TableCell>Int.r.</TableCell>
+                <TableCell>Int. rate</TableCell>
                 <TableCell>Credit minimal payment</TableCell>
                 <TableCell>Credit fact payment</TableCell>
                 <TableCell>Credit debt</TableCell>
-                
-                <TableCell>Expencies</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {props.detalization.map(month => (
-              <TableRow key={month.id}>
+              <TableRow
+                className={month.expencies && Object.keys(month.expencies).length && classes.milestone} key={month.id}>
                 <TableCell>{month.month}</TableCell>
+
+                <TableCell className={classes.Expencies}>
+                  {month.expencies && month.expencies['buy_realty'] ?
+                    <Box className={classes.Expency}><strong>Realty:</strong> {month.expencies['buy_realty']}</Box>
+                  : null}
+                  {month.expencies && month.expencies['mortgage_insurance'] ?
+                    <Box className={classes.Expency}><strong>Insurance:</strong> {month.expencies['mortgage_insurance']}</Box>
+                  : null}
+                  {month.expencies && month.expencies['repairing'] ?
+                    <Box className={classes.Expency}><strong>Repairing:</strong> {month.expencies['repairing']}</Box>
+                  : null}
+                  {month.expencies && month.expencies['settling'] ?
+                    <Box className={classes.Expency}><strong>Settling:</strong> {month.expencies['settling']}</Box>
+                  : null}
+                  {!month.expencies || (month.expencies && Object.keys(month.expencies).length === 0) ?
+                    '—'
+                  : null}
+                </TableCell>
+                
                 <TableCell>+{month.earn}</TableCell>
                 <TableCell>
                     {month.rent !== 0 ? '-' : null}{month.rent}
@@ -158,23 +179,6 @@ const Detalization = (props) => {
                   </Fragment>
                 )}
                 
-                <TableCell className={classes.Expencies}>
-                  {month.expencies && month.expencies['buy_realty'] ?
-                    <Box className={classes.Expency}><strong>Realty:</strong> {month.expencies['buy_realty']}</Box>
-                  : null}
-                  {month.expencies && month.expencies['mortgage_insurance'] ?
-                    <Box className={classes.Expency}><strong>Insurance:</strong> {month.expencies['mortgage_insurance']}</Box>
-                  : null}
-                  {month.expencies && month.expencies['repairing'] ?
-                    <Box className={classes.Expency}><strong>Repairing:</strong> {month.expencies['repairing']}</Box>
-                  : null}
-                  {month.expencies && month.expencies['settling'] ?
-                    <Box className={classes.Expency}><strong>Settling:</strong> {month.expencies['settling']}</Box>
-                  : null}
-                  {!month.expencies || (month.expencies && Object.keys(month.expencies).length === 0) ?
-                    '—'
-                  : null}
-                </TableCell>
               </TableRow>
               ))}
             </TableBody>

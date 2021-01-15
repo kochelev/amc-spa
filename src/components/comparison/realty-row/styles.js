@@ -2,15 +2,19 @@ import { makeStyles } from '@material-ui/core/styles';
 
 export default makeStyles((theme) => ({
   root: {
-    '& > *': {
-    borderBottom: '1px solid rgba(0,0,0,0.1)',
-    borderRight: '1px solid rgba(0,0,0,0.1)'
+    '& > td': {
+      verticalAlign: 'top',
+      borderBottom: '1px solid rgba(0,0,0,0.1)',
+      borderRight: '1px solid rgba(0,0,0,0.1)'
     },
+    '& > td:last-child': {
+      borderRight: 'none',
+    }
   },
   expanderColumn: {
-    // padding: '15px 4px !important',
     textAlign: 'center',
     verticalAlign: 'top',
+    padding: theme.spacing(1) + 'px !important',
   },
   controlsColumn: {
     padding: '4px !important',
@@ -26,24 +30,21 @@ export default makeStyles((theme) => ({
   plans: {
     display: 'table',
     width: '100%',
-    height: '100%',
-    minHeight: 60,
+    minHeight: '100%',
     tableLayout: 'fixed',
   },
-  savePlan: {
+  plan: {
     display: 'table-cell',
-    verticalAlign: 'middle',
+    verticalAlign: 'top',
+  },
+  savePlan: {
     backgroundColor: '#ffffe0',
   },
   creditPlan: {
-    display: 'table-cell',
-    verticalAlign: 'middle',
     backgroundColor: '#fff0e0',
   },
-  ShortYears: {
-    fontWeight: 300,
-  },
-  ShortMonth: {
-    fontSize: '0.7rem',
+  impossible: {
+    color: 'red',
+    verticalAlign: 'middle !important',
   }
 }));

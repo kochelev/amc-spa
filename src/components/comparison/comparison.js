@@ -8,16 +8,11 @@ import { updatePrerequisites, updateAllRealties, deleteRealty, deleteAllRealties
 
 import Paper from '@material-ui/core/Paper';
 import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
 
-import Fab from '@material-ui/core/Fab';
 import Button from '@material-ui/core/Button';
+import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import CardActionArea from '@material-ui/core/CardActionArea';
 
 import TableContainer from '@material-ui/core/TableContainer';
 import Table from '@material-ui/core/Table';
@@ -29,7 +24,8 @@ import TableCell from '@material-ui/core/TableCell';
 // Custom Components
 
 import realtySifter from '../../helpers/realtySifter';
-import Realty from './realty/realty';
+import RealtyRow from './realty-row/realty-row';
+import MortgagesRow from './mortgages-row/mortgages-row';
 
 // Custom Styles
 
@@ -49,6 +45,10 @@ const Comparison = (props) => {
 
   const deleteMortgageScheme = (event, id) => {
     event.preventDefault();
+    
+    const result = window.confirm("Are you sure you want to delete mortgage scheme?");
+    if (!result) return;
+
     const x = props.prerequisites.mortgage_schemes.filter((element) => element.id !== id);
     const updatedPerequisites = {
       ...props.prerequisites,
@@ -85,12 +85,20 @@ const Comparison = (props) => {
 
   const deleteRealty = (event, id) => {
     event.preventDefault();
+    
+    const result = window.confirm("Are you sure you want to delete realty?");
+    if (!result) return;
+    
     props.deleteRealty(id);
   }
 
   const deleteAllRealties = (event) => {
     event.preventDefault();
     if (props.realtyList.length === 0) return;
+
+    const result = window.confirm("Are you sure you want to delete all realties?");
+    if (!result) return;
+    
     props.deleteAllRealties();
   }
 
@@ -105,57 +113,29 @@ const Comparison = (props) => {
       <TableContainer component={Paper} elevation={0} square>
         <Table className={classes.table} size="small" stickyHeader aria-label="sticky table">
           <TableHead>
-            <TableRow>
-              <TableCell className={classes.expanderColumn}></TableCell>
-              <TableCell className={classes.mortgagePreambula}>
-                <Typography variant="body1">
-                  Mortgage Schemes
-                </Typography>
-              </TableCell>
-              {props.prerequisites ?
-                props.prerequisites.mortgage_schemes.map((scheme, i) => {
-                  return (
-                    <TableCell key={i} align="center">
-                      <Card className={classes.card}>
-                        <CardActionArea
-                          className={classes.cardActionArea}
-                          onClick={(event) => setMortgageScheme(event, scheme)}
-                          disabled={props.isSettingMortgageScheme.isShown}>
-                          <CardContent className={classes.cardContent}>
-                            <Typography className={classes.title} variant="subtitle2" component="p">
-                              {scheme.title}
-                            </Typography>
-                            <Typography className={classes.description} variant="body2" component="p" color="textSecondary">
-                              {scheme.schedule.length === 1 ? 
-                                '' + Math.round(scheme.schedule[0].months / 12, 0) + ' years for ' + scheme.schedule[0].interest_rate + '\u2009%'
-                              : 'First ' + scheme.schedule[0].months + ' months for ' + scheme.schedule[0].interest_rate + '\u2009%'}
-                            </Typography>
-                          </CardContent>
-                        </CardActionArea>
-                        <CardActionArea
-                          className={classes.cardActions}
-                          onClick={event => deleteMortgageScheme(event, scheme.id)}
-                          disabled={props.isSettingRealty.isShown}>
-                            <DeleteIcon fontSize="small" />
-                        </CardActionArea>
-                      </Card>
-                    </TableCell>
-                  );
-                })
-              : null}
-              <TableCell className={classes.controlsColumn}>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={(event) => setMortgageScheme(event)}
-                  disabled={props.isSettingMortgageScheme.isShown}>Add</Button>
-              </TableCell>
-            </TableRow>
+            <MortgagesRow
+              setMortgageScheme={setMortgageScheme}
+              deleteMortgageScheme={deleteMortgageScheme}
+              isSettingMortgageScheme={props.isSettingMortgageScheme} />
           </TableHead>
           {props.realtyList && props.realtyList.length > 0 ?
           <TableBody>
+            
+            <TableRow className={classes.descriptionRow}>
+              <TableCell>Realty description</TableCell>
+              {props.prerequisites ?
+                props.prerequisites.mortgage_schemes.map((scheme, i) => (
+                  <Fragment key={i}>
+                    <TableCell>Save</TableCell>
+                    <TableCell>Get credit</TableCell>
+                  </Fragment>
+                )
+              ) : null}
+              <TableCell></TableCell>
+            </TableRow>
+
             {props.realtyList.map((realty, i) => (
-              <Realty
+              <RealtyRow
                 key={i}
                 realty={realty}
                 setRealty={(...args) => setRealty(...args)}
@@ -177,15 +157,14 @@ const Comparison = (props) => {
             variant="outlined"
             color="primary"
             onClick={event => deleteAllRealties(event)}
-            endIcon={<DeleteIcon />}>Delete All Realties
-          </Button>
+            endIcon={<DeleteIcon />}>Delete all realties</Button>
         </Box>
       : null }
 
       <Fab
         color="secondary"
         aria-label="add"
-        className={classes.fab}
+        className={classes.addRealtyButton}
         onClick={(event) => setRealty(event)}
         disabled={!props.prerequisites || props.isSettingRealty.isShown}>
           <AddIcon />

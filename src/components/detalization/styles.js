@@ -57,5 +57,9 @@ export default makeStyles(theme => ({
   Expency: {
     
   },
-
+  milestone: {
+    '& > td': {
+      backgroundColor: '#f8ffa4',
+    }
+  },
 }));

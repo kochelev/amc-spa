@@ -103,7 +103,7 @@ const App = (props) => {
           <Box className={classes.contentWrapper}>
             <div className={classes.drawerHeader}>
   
-              <Typography variant="h5">
+              <Typography className={classes.siteName}>
                 Mortgage<br/>Calculator ++
               </Typography>
               
@@ -158,7 +158,7 @@ const App = (props) => {
           : null}
   
           <Box className={classes.footer}>
-            dfasdf
+            
           </Box>
   
         </main>

@@ -252,8 +252,6 @@ const SetRealty = (props) => {
             <button onClick={(event) => putDataIntoForm(realties.realty3, event)}>Realty 3</button><br/>
             <button onClick={(event) => putDataIntoForm(realties.realty4, event)}>Realty 4</button><br/>
             <button onClick={(event) => putDataIntoForm(realties.realty5, event)}>Realty 5</button><br/>
-            <button onClick={(event) => {event.preventDefault(); reset(defaultValues)}}>Cancel changes!</button><br/>
-            <button onClick={(event) => {event.preventDefault(); reset()}}>Clear all!</button>
           </DialogActions>
         </form>
       </Fragment>

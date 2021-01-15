@@ -76,6 +76,7 @@ const SetMortgageScheme = (props) => {
 
   useEffect(() => {
     const currentValues = getValues();
+    console.log('formValues: ', formValues);
     if (deepEqual(defaultValues, currentValues)) setIsFormChanged(false);
     else setIsFormChanged(true);
   }, [formValues]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -173,7 +174,6 @@ const SetMortgageScheme = (props) => {
     register,
     disabled: props.isPending,
   }
-
   return (
     props.prerequisites ? (
       <Fragment>
@@ -194,7 +194,7 @@ const SetMortgageScheme = (props) => {
 
             <ConfiguredTextField {...textFieldProps}
               name="initial_payment_percent"
-              label="Initial payment (percent)"
+              label="Initial payment"
               helperText=".....?"
               required={true}
               pattern={RegExpList.zeroPosFloat}
@@ -202,7 +202,7 @@ const SetMortgageScheme = (props) => {
 
             <ConfiguredTextField {...textFieldProps}
               name="initial_expencies"
-              label="Initial Expencies"
+              label="Initial expencies"
               helperText=".....?"
               required={true}
               pattern={RegExpList.zeroPosInt}
@@ -264,17 +264,18 @@ const SetMortgageScheme = (props) => {
                 )
               })}
 
-              <Box className={classes.bottomControls}>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  color="primary"
-                  onClick={event => addPeriod(event)}
-                  endIcon={<AddIcon />}>
-                    Add Period
-                </Button>
-              </Box>
-
+              {!formValues.schedule || Object.keys(formValues.schedule).length < 2 ? (
+                <Box className={classes.bottomControls}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                    onClick={event => addPeriod(event)}
+                    endIcon={<AddIcon />}>
+                      Add Period
+                  </Button>
+                </Box>
+              ) : null}
             </Box>
 
           </DialogContent>
